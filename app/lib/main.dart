@@ -120,6 +120,56 @@ class TrainProgressApp extends StatelessWidget {
   }
 }
 
+class IllustratedEmptyState extends StatelessWidget {
+  const IllustratedEmptyState({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.accentColor,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color? accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = accentColor ?? Theme.of(context).colorScheme.primary;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 260),
+      child: Center(
+        key: ValueKey(title),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 92,
+                height: 92,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(color: color.withValues(alpha: 0.18), blurRadius: 24, offset: const Offset(0, 10)),
+                  ],
+                ),
+                child: Icon(icon, size: 46, color: color),
+              ),
+              const SizedBox(height: 20),
+              Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+              const SizedBox(height: 8),
+              Text(subtitle, style: Theme.of(context).textTheme.bodyLarge, textAlign: TextAlign.center),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class WorkoutListPage extends StatefulWidget {
   const WorkoutListPage({super.key});
 
@@ -261,20 +311,11 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
           }
           final categories = categorySnapshot.data ?? [];
           if (categories.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.category_outlined, size: 56, color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(height: 16),
-                    Text('Crie sua primeira categoria', style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 8),
-                    Text('Organize treinos por foco e comece a evoluir.', style: Theme.of(context).textTheme.bodyLarge, textAlign: TextAlign.center),
-                  ],
-                ),
-              ),
+            return IllustratedEmptyState(
+              icon: Icons.category_outlined,
+              title: 'Crie sua primeira categoria',
+              subtitle: 'Organize treinos por foco e comece a evoluir.',
+              accentColor: Theme.of(context).colorScheme.primary,
             );
           }
           return Column(
@@ -319,20 +360,11 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                     }
                     final workouts = snapshot.data ?? [];
                     if (workouts.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.fitness_center, size: 56, color: Theme.of(context).colorScheme.primary),
-                              const SizedBox(height: 16),
-                              Text('Nenhum treino por aqui ainda', style: Theme.of(context).textTheme.titleLarge),
-                              const SizedBox(height: 8),
-                              Text('Adicione seu primeiro treino para registrar evolução.', style: Theme.of(context).textTheme.bodyLarge, textAlign: TextAlign.center),
-                            ],
-                          ),
-                        ),
+                      return IllustratedEmptyState(
+                        icon: Icons.fitness_center,
+                        title: 'Nenhum treino por aqui ainda',
+                        subtitle: 'Adicione seu primeiro treino para registrar evolução.',
+                        accentColor: Theme.of(context).colorScheme.primary,
                       );
                     }
                     return RefreshIndicator(
@@ -1208,7 +1240,12 @@ class _ProgressPageState extends State<ProgressPage> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _exerciseNames.isEmpty
-                ? Center(child: Text('Nenhum exercício salvo ainda. Crie um treino para ver a progressão.', style: Theme.of(context).textTheme.bodyLarge, textAlign: TextAlign.center))
+                ? IllustratedEmptyState(
+                    icon: Icons.insights_outlined,
+                    title: 'Nenhum exercício salvo ainda',
+                    subtitle: 'Crie um treino para acompanhar sua progressão.',
+                    accentColor: Theme.of(context).colorScheme.primary,
+                  )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1236,7 +1273,12 @@ class _ProgressPageState extends State<ProgressPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(16),
                             child: _progression.isEmpty
-                                ? Center(child: Text('Selecione um exercício para visualizar o gráfico de carga.', style: Theme.of(context).textTheme.bodyLarge, textAlign: TextAlign.center))
+                                ? IllustratedEmptyState(
+                                    icon: Icons.show_chart,
+                                    title: 'Selecione um exercício',
+                                    subtitle: 'Visualize o gráfico de carga e veja sua evolução ao longo do tempo.',
+                                    accentColor: Theme.of(context).colorScheme.primary,
+                                  )
                                 : Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
