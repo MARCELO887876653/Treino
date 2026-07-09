@@ -116,13 +116,19 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
 
   Future<void> _exportBackup() async {
     final file = await DatabaseHelper.instance.createBackupFile();
-    await Share.shareXFiles([XFile(file.path)], subject: 'Backup de treinos');
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+        subject: 'Backup de treinos',
+      ),
+    );
   }
 
   Future<void> _importBackup() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['json']);
-    if (result == null || result.files.single.path == null) return;
-    final file = File(result.files.single.path!);
+    final result = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: ['json']);
+    final path = result?.path;
+    if (path == null) return;
+    final file = File(path);
     final jsonString = await file.readAsString();
     await DatabaseHelper.instance.restoreFromBackup(jsonString);
     if (!mounted) return;
