@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "com.jrp37wgp.app"
-    compileSdk = flutter.compileSdkVersion
+    // Use explicit SDK versions to ensure compatibility with plugins
+    compileSdk = 33
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -19,8 +20,9 @@ android {
         applicationId = "com.jrp37wgp.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // Ensure minSdk and targetSdk meet current plugin requirements
+        minSdk = 21
+        targetSdk = 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
