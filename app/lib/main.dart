@@ -11,6 +11,95 @@ import 'package:vibration/vibration.dart';
 import 'database_helper.dart';
 import 'models.dart';
 
+const Color kPrimaryColor = Color(0xFFFF6B35);
+const Color kAccentColor = Color(0xFFE63946);
+const Color kBackgroundColor = Color(0xFF121212);
+const Color kSurfaceColor = Color(0xFF1E1E1E);
+const Color kSurfaceElevated = Color(0xFF262626);
+const Color kTextPrimary = Color(0xFFF5F5F5);
+const Color kTextSecondary = Color(0xFFB8B8B8);
+
+ThemeData buildFitLogTheme() {
+  final baseTheme = ThemeData.dark(useMaterial3: true);
+  final colorScheme = ColorScheme.fromSeed(seedColor: kPrimaryColor, brightness: Brightness.dark, secondary: kAccentColor);
+
+  return baseTheme.copyWith(
+    colorScheme: colorScheme.copyWith(
+      primary: kPrimaryColor,
+      secondary: kAccentColor,
+      surface: kSurfaceColor,
+      surfaceContainerHighest: kSurfaceElevated,
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onSurface: kTextPrimary,
+    ),
+    scaffoldBackgroundColor: kBackgroundColor,
+    appBarTheme: AppBarTheme(
+      backgroundColor: kBackgroundColor,
+      foregroundColor: kTextPrimary,
+      elevation: 0,
+      titleTextStyle: baseTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: kTextPrimary, fontSize: 22),
+    ),
+    cardTheme: CardThemeData(
+      color: kSurfaceColor,
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: EdgeInsets.zero,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: kSurfaceColor,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF3A3A3A))),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF3A3A3A))),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: kPrimaryColor)),
+      labelStyle: const TextStyle(color: kTextSecondary),
+      hintStyle: const TextStyle(color: kTextSecondary),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: kPrimaryColor,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+    ),
+    textTheme: baseTheme.textTheme.copyWith(
+      headlineSmall: baseTheme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, color: kTextPrimary),
+      titleLarge: baseTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: kTextPrimary),
+      titleMedium: baseTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: kTextPrimary),
+      bodyLarge: baseTheme.textTheme.bodyLarge?.copyWith(color: kTextSecondary),
+      bodyMedium: baseTheme.textTheme.bodyMedium?.copyWith(color: kTextSecondary),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: kSurfaceColor,
+      contentTextStyle: const TextStyle(color: kTextPrimary),
+    ),
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+    }),
+  );
+}
+
+SnackBar buildStyledSnackBar(String message, {Color? color}) {
+  return SnackBar(
+    content: Text(message),
+    behavior: SnackBarBehavior.floating,
+    backgroundColor: color ?? kSurfaceColor,
+    margin: const EdgeInsets.all(16),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  );
+}
+
+void showFitLogSnackBar(BuildContext context, String message, {Color? color}) {
+  ScaffoldMessenger.of(context).showSnackBar(buildStyledSnackBar(message, color: color));
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseHelper.instance.init();
@@ -23,13 +112,9 @@ class TrainProgressApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Progressão de Treino',
-      theme: ThemeData.dark(useMaterial3: true).copyWith(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-      ),
+      title: 'FitLog',
+      debugShowCheckedModeBanner: false,
+      theme: buildFitLogTheme(),
       home: const WorkoutListPage(),
     );
   }
@@ -96,7 +181,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
   Future<void> _deleteWorkout(int workoutId) async {
     await DatabaseHelper.instance.deleteWorkout(workoutId);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Treino excluído com sucesso.')));
+    showFitLogSnackBar(context, 'Treino excluído com sucesso.', color: kAccentColor);
     _refreshWorkouts();
   }
 
@@ -144,7 +229,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Progressão de Treino'),
+        title: const Text('FitLog'),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) async {
@@ -176,7 +261,21 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
           }
           final categories = categorySnapshot.data ?? [];
           if (categories.isEmpty) {
-            return const Center(child: Text('Nenhuma categoria cadastrada.'));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.category_outlined, size: 56, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(height: 16),
+                    Text('Crie sua primeira categoria', style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 8),
+                    Text('Organize treinos por foco e comece a evoluir.', style: Theme.of(context).textTheme.bodyLarge, textAlign: TextAlign.center),
+                  ],
+                ),
+              ),
+            );
           }
           return Column(
             children: [
@@ -220,7 +319,21 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                     }
                     final workouts = snapshot.data ?? [];
                     if (workouts.isEmpty) {
-                      return const Center(child: Text('Nenhum treino encontrado nesta categoria.'));
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.fitness_center, size: 56, color: Theme.of(context).colorScheme.primary),
+                              const SizedBox(height: 16),
+                              Text('Nenhum treino por aqui ainda', style: Theme.of(context).textTheme.titleLarge),
+                              const SizedBox(height: 8),
+                              Text('Adicione seu primeiro treino para registrar evolução.', style: Theme.of(context).textTheme.bodyLarge, textAlign: TextAlign.center),
+                            ],
+                          ),
+                        ),
+                      );
                     }
                     return RefreshIndicator(
                       onRefresh: _refreshWorkouts,
@@ -231,46 +344,75 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                         itemBuilder: (context, index) {
                           final workout = workouts[index];
                           final exerciseCount = workout.exercises.length;
-                          return Dismissible(
-                            key: Key('workout-${workout.id}'),
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              padding: const EdgeInsets.only(right: 24),
-                              alignment: Alignment.centerRight,
-                              color: Colors.red.shade600,
-                              child: const Icon(Icons.delete, color: Colors.white),
-                            ),
-                            confirmDismiss: (_) async => _confirmDelete(context, workout.name),
-                            onDismissed: (_) async => _deleteWorkout(workout.id!),
-                            child: Card(
-                              elevation: 3,
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                title: Text(workout.name, style: Theme.of(context).textTheme.titleMedium),
-                                subtitle: Text('${_formatDate(workout.date)} · $exerciseCount exercício(s)${workout.notes.isEmpty ? '' : ' · ${workout.notes}'}'),
-                                trailing: PopupMenuButton<String>(
-                                  icon: const Icon(Icons.more_vert),
-                                  onSelected: (value) async {
-                                    if (value == 'edit') {
-                                      await _editWorkout(workout);
-                                    } else if (value == 'delete') {
-                                      final confirmed = await _confirmDelete(context, workout.name);
-                                      if (confirmed) {
-                                        await _deleteWorkout(workout.id!);
+                          final seriesCount = workout.exercises.fold<int>(0, (sum, e) => sum + e.sets.length);
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 280),
+                            curve: Curves.easeOutCubic,
+                            child: Dismissible(
+                              key: Key('workout-${workout.id}'),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                padding: const EdgeInsets.only(right: 24),
+                                alignment: Alignment.centerRight,
+                                color: Colors.red.shade600,
+                                child: const Icon(Icons.delete, color: Colors.white),
+                              ),
+                              confirmDismiss: (_) async => _confirmDelete(context, workout.name),
+                              onDismissed: (_) async => _deleteWorkout(workout.id!),
+                              child: Card(
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                  title: Row(
+                                    children: [
+                                      Expanded(child: Text(workout.name, style: Theme.of(context).textTheme.titleMedium)),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(999)),
+                                        child: Text('$exerciseCount ex.', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700)),
+                                      ),
+                                    ],
+                                  ),
+                                  subtitle: Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('${_formatDate(workout.date)} · $seriesCount séries', style: const TextStyle(color: kTextSecondary)),
+                                        if (workout.notes.isNotEmpty)
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 4),
+                                            child: Text(workout.notes, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: kTextSecondary)),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  trailing: PopupMenuButton<String>(
+                                    icon: const Icon(Icons.more_vert),
+                                    onSelected: (value) async {
+                                      if (value == 'edit') {
+                                        await _editWorkout(workout);
+                                      } else if (value == 'delete') {
+                                        final confirmed = await _confirmDelete(context, workout.name);
+                                        if (confirmed) {
+                                          await _deleteWorkout(workout.id!);
+                                        }
                                       }
-                                    }
+                                    },
+                                    itemBuilder: (context) => [
+                                      const PopupMenuItem(value: 'edit', child: Text('Editar')),
+                                      const PopupMenuItem(value: 'delete', child: Text('Excluir')),
+                                    ],
+                                  ),
+                                  onTap: () async {
+                                    await Navigator.of(context).push<bool>(
+                                      PageRouteBuilder(
+                                        pageBuilder: (_, _, _) => WorkoutDetailPage(workout: workout),
+                                        transitionsBuilder: (_, animation, _, child) => FadeTransition(opacity: animation, child: child),
+                                      ),
+                                    );
+                                    _refreshWorkouts();
                                   },
-                                  itemBuilder: (context) => [
-                                    const PopupMenuItem(value: 'edit', child: Text('Editar')),
-                                    const PopupMenuItem(value: 'delete', child: Text('Excluir')),
-                                  ],
                                 ),
-                                onTap: () async {
-                                  await Navigator.of(context).push<bool>(
-                                    MaterialPageRoute(builder: (_) => WorkoutDetailPage(workout: workout)),
-                                  );
-                                  _refreshWorkouts();
-                                },
                               ),
                             ),
                           );
@@ -284,13 +426,23 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const WorkoutFormPage()));
-          _refreshWorkouts();
-        },
-        tooltip: 'Adicionar novo treino',
-        child: const Icon(Icons.add),
+      floatingActionButton: AnimatedScale(
+        duration: const Duration(milliseconds: 220),
+        scale: 1,
+        child: FloatingActionButton.extended(
+          onPressed: () async {
+            await Navigator.of(context).push(
+              PageRouteBuilder(
+                pageBuilder: (_, _, _) => const WorkoutFormPage(),
+                transitionsBuilder: (_, animation, _, child) => SlideTransition(position: Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero).animate(animation), child: FadeTransition(opacity: animation, child: child)),
+              ),
+            );
+            _refreshWorkouts();
+          },
+          tooltip: 'Adicionar novo treino',
+          icon: const Icon(Icons.add),
+          label: const Text('Novo treino'),
+        ),
       ),
     );
   }
@@ -457,7 +609,7 @@ class _WorkoutDetailPageState extends State<WorkoutDetailPage> {
           _isResting = false;
           Vibration.vibrate(duration: 500);
           SystemSound.play(SystemSoundType.alert);
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Descanso encerrado!')));
+          showFitLogSnackBar(context, 'Descanso encerrado!', color: kAccentColor);
         }
       });
     });
@@ -467,7 +619,7 @@ class _WorkoutDetailPageState extends State<WorkoutDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalhes do Treino'),
+        title: const Text('Detalhes do treino'),
         actions: [
           IconButton(icon: const Icon(Icons.copy), tooltip: 'Duplicar treino', onPressed: _duplicateWorkout),
           IconButton(icon: const Icon(Icons.timer), tooltip: 'Iniciar descanso', onPressed: _showRestTimer),
@@ -478,9 +630,18 @@ class _WorkoutDetailPageState extends State<WorkoutDetailPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(_workout.name, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 8),
-          Text(_formatDate(_workout.date), style: Theme.of(context).textTheme.bodyLarge),
+          Row(
+            children: [
+              Expanded(child: Text(_workout.name, style: Theme.of(context).textTheme.headlineSmall)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(color: kPrimaryColor.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(999)),
+                child: Text(_formatDate(_workout.date), style: const TextStyle(color: kPrimaryColor, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(_workout.notes.isEmpty ? 'Sem observações' : _workout.notes, style: Theme.of(context).textTheme.bodyLarge),
           if (_workout.notes.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text('Observações', style: Theme.of(context).textTheme.titleMedium),
@@ -489,15 +650,19 @@ class _WorkoutDetailPageState extends State<WorkoutDetailPage> {
           ],
           if (_isResting) ...[
             const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Descanso'),
-                    Text('$_remainingSeconds s', style: Theme.of(context).textTheme.titleLarge),
-                  ],
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              child: Card(
+                color: kAccentColor.withValues(alpha: 0.15),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(children: [const Icon(Icons.timer_outlined, color: kAccentColor), const SizedBox(width: 8), const Text('Descanso')]),
+                      Text('$_remainingSeconds s', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: kAccentColor, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -505,16 +670,21 @@ class _WorkoutDetailPageState extends State<WorkoutDetailPage> {
           const SizedBox(height: 24),
           for (final exercise in _workout.exercises) ...[
             Card(
-              elevation: 3,
               margin: const EdgeInsets.only(bottom: 16),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(exercise.name, style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 8),
-                    const Divider(thickness: 1),
+                    Row(
+                      children: [
+                        const Icon(Icons.fitness_center, color: kPrimaryColor),
+                        const SizedBox(width: 10),
+                        Expanded(child: Text(exercise.name, style: Theme.of(context).textTheme.titleMedium)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Divider(thickness: 1, color: Color(0xFF353535)),
                     for (final set in exercise.sets) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -528,7 +698,7 @@ class _WorkoutDetailPageState extends State<WorkoutDetailPage> {
                                 Text('${set.weight.toStringAsFixed(1)} kg', style: Theme.of(context).textTheme.bodyLarge),
                                 if ((_prWeights[exercise.name] ?? -1) >= set.weight) ...[
                                   const SizedBox(width: 8),
-                                  const Icon(Icons.emoji_events, color: Colors.amber, size: 18),
+                                  AnimatedScale(duration: const Duration(milliseconds: 220), scale: 1.1, child: const Icon(Icons.emoji_events, color: kAccentColor, size: 20)),
                                 ],
                               ],
                             ),
@@ -733,7 +903,7 @@ class _WorkoutFormPageState extends State<WorkoutFormPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    showFitLogSnackBar(context, message, color: kAccentColor);
   }
 
   @override
@@ -742,7 +912,7 @@ class _WorkoutFormPageState extends State<WorkoutFormPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Editar Treino' : 'Novo Treino')),
+      appBar: AppBar(title: Text(_isEditing ? 'Editar treino' : 'Novo treino')),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -779,7 +949,6 @@ class _WorkoutFormPageState extends State<WorkoutFormPage> {
                 const SizedBox(height: 20),
                 for (final entry in _exercises.asMap().entries)
                   Card(
-                    elevation: 3,
                     margin: const EdgeInsets.only(bottom: 18),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -924,7 +1093,7 @@ class _CategoryManagerPageState extends State<CategoryManagerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Gerenciar categorias')),
+      appBar: AppBar(title: const Text('Categorias')),
       body: FutureBuilder<List<Category>>(
         future: _categoriesFuture,
         builder: (context, snapshot) {
@@ -1071,7 +1240,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                 : Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('Progresso de ${_selectedExercise!}', style: Theme.of(context).textTheme.titleLarge),
+                                      Text('Progresso de $_selectedExercise!', style: Theme.of(context).textTheme.titleLarge),
                                       const SizedBox(height: 16),
                                       Expanded(
                                         child: LineChart(

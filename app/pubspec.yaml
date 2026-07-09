@@ -1,5 +1,5 @@
 name: app
-description: "A new Flutter project."
+description: "FitLog — uma experiência moderna para registrar treinos e evolução."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -41,6 +41,8 @@ dependencies:
   share_plus: ^13.2.0
   file_picker: ^12.0.0-beta.7
   vibration: ^3.2.0
+  flutter_launcher_icons: ^0.14.2
+  flutter_native_splash: ^2.4.8
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +60,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/icon/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

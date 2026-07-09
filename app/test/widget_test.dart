@@ -15,6 +15,6 @@ void main() {
     await tester.pumpWidget(const TrainProgressApp());
 
     // Verify that the app shows the main title.
-    expect(find.text('Progressão de Treino'), findsOneWidget);
+    expect(find.text('FitLog'), findsOneWidget);
   });
 }
