@@ -27,6 +27,9 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: _onCreate,
+      onOpen: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
     );
   }
 
@@ -80,6 +83,54 @@ class DatabaseHelper {
       }
       return workoutId;
     });
+  }
+
+  Future<int> updateWorkout(Workout workout) async {
+    final db = await database;
+    if (workout.id == null) {
+      return insertWorkout(workout);
+    }
+    return await db.transaction<int>((txn) async {
+      await txn.update(
+        'workouts',
+        workout.toMap(),
+        where: 'id = ?',
+        whereArgs: [workout.id],
+      );
+      await txn.delete('sets', where: 'exercise_id IN (SELECT id FROM exercises WHERE workout_id = ?)', whereArgs: [workout.id]);
+      await txn.delete('exercises', where: 'workout_id = ?', whereArgs: [workout.id]);
+      for (final exercise in workout.exercises) {
+        final exerciseId = await txn.insert('exercises', {
+          'workout_id': workout.id,
+          'name': exercise.name,
+        });
+        for (final set in exercise.sets) {
+          await txn.insert('sets', {
+            'exercise_id': exerciseId,
+            'reps': set.reps,
+            'weight': set.weight,
+            'set_order': set.order,
+          });
+        }
+      }
+      return workout.id!;
+    });
+  }
+
+  Future<int> deleteWorkout(int workoutId) async {
+    final db = await database;
+    return db.delete('workouts', where: 'id = ?', whereArgs: [workoutId]);
+  }
+
+  Future<Workout?> getWorkoutById(int id) async {
+    final db = await database;
+    final workoutRows = await db.query('workouts', where: 'id = ?', whereArgs: [id]);
+    if (workoutRows.isEmpty) {
+      return null;
+    }
+    final workoutRow = workoutRows.first;
+    final exercises = await getExercisesByWorkout(id);
+    return Workout.fromMap(workoutRow, exercises: exercises);
   }
 
   Future<List<Workout>> getWorkouts() async {
