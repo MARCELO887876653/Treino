@@ -17,134 +17,102 @@ class Category {
       name: map['name'] as String,
     );
   }
-}
-
-class Workout {
-  final int? id;
-  final String name;
-  final DateTime date;
-  final String notes;
-  final int? categoryId;
-  final List<Exercise> exercises;
-
-  Workout({
-    this.id,
-    required this.name,
-    required this.date,
-    this.notes = '',
-    this.categoryId,
-    required this.exercises,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'date': date.toIso8601String(),
-      'notes': notes,
-      'category_id': categoryId,
-    };
-  }
-
-  factory Workout.fromMap(Map<String, dynamic> map, {List<Exercise>? exercises}) {
-    return Workout(
-      id: map['id'] as int?,
-      name: map['name'] as String,
-      date: DateTime.parse(map['date'] as String),
-      notes: (map['notes'] ?? '') as String,
-      categoryId: map['category_id'] as int?,
-      exercises: exercises ?? [],
-    );
-  }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
-      'date': date.toIso8601String(),
-      'notes': notes,
-      'category_id': categoryId,
-      'exercises': exercises.map((exercise) => exercise.toJson()).toList(),
     };
-  }
-
-  factory Workout.fromJson(Map<String, dynamic> map) {
-    return Workout(
-      id: map['id'] as int?,
-      name: map['name'] as String,
-      date: DateTime.parse(map['date'] as String),
-      notes: (map['notes'] ?? '') as String,
-      categoryId: map['category_id'] as int?,
-      exercises: (map['exercises'] as List<dynamic>?)
-              ?.map((value) => Exercise.fromJson(value as Map<String, dynamic>))
-              .toList() ??
-          [],
-    );
   }
 }
 
 class Exercise {
   final int? id;
-  final int? workoutId;
+  final int? categoryId;
   final String name;
-  final List<WorkoutSet> sets;
 
-  Exercise({
-    this.id,
-    this.workoutId,
-    required this.name,
-    required this.sets,
-  });
+  Exercise({this.id, this.categoryId, required this.name});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'workout_id': workoutId,
+      'category_id': categoryId,
       'name': name,
     };
   }
 
-  factory Exercise.fromMap(Map<String, dynamic> map, {List<WorkoutSet>? sets}) {
+  factory Exercise.fromMap(Map<String, dynamic> map) {
     return Exercise(
       id: map['id'] as int?,
-      workoutId: map['workout_id'] as int?,
+      categoryId: map['category_id'] as int?,
       name: map['name'] as String,
-      sets: sets ?? [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'workout_id': workoutId,
+      'category_id': categoryId,
       'name': name,
-      'sets': sets.map((set) => set.toJson()).toList(),
     };
-  }
-
-  factory Exercise.fromJson(Map<String, dynamic> map) {
-    return Exercise(
-      id: map['id'] as int?,
-      workoutId: map['workout_id'] as int?,
-      name: map['name'] as String,
-      sets: (map['sets'] as List<dynamic>?)
-              ?.map((value) => WorkoutSet.fromJson(value as Map<String, dynamic>))
-              .toList() ??
-          [],
-    );
   }
 }
 
-class WorkoutSet {
+class TrainingRecord {
   final int? id;
   final int? exerciseId;
+  final DateTime date;
+  final String notes;
+  final List<SeriesEntry> series;
+
+  TrainingRecord({
+    this.id,
+    this.exerciseId,
+    required this.date,
+    this.notes = '',
+    required this.series,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'exercise_id': exerciseId,
+      'date': date.toIso8601String(),
+      'notes': notes,
+    };
+  }
+
+  factory TrainingRecord.fromMap(Map<String, dynamic> map, {List<SeriesEntry>? series}) {
+    return TrainingRecord(
+      id: map['id'] as int?,
+      exerciseId: map['exercise_id'] as int?,
+      date: DateTime.parse(map['date'] as String),
+      notes: (map['notes'] ?? '') as String,
+      series: series ?? const [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'exercise_id': exerciseId,
+      'date': date.toIso8601String(),
+      'notes': notes,
+      'series': series.map((entry) => entry.toJson()).toList(),
+    };
+  }
+}
+
+class SeriesEntry {
+  final int? id;
+  final int? recordId;
   final int reps;
   final double weight;
   final int order;
 
-  WorkoutSet({
+  const SeriesEntry({
     this.id,
-    this.exerciseId,
+    this.recordId,
     required this.reps,
     required this.weight,
     required this.order,
@@ -153,40 +121,30 @@ class WorkoutSet {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'exercise_id': exerciseId,
+      'record_id': recordId,
       'reps': reps,
       'weight': weight,
-      'set_order': order,
+      'series_order': order,
     };
   }
 
-  factory WorkoutSet.fromMap(Map<String, dynamic> map) {
-    return WorkoutSet(
+  factory SeriesEntry.fromMap(Map<String, dynamic> map) {
+    return SeriesEntry(
       id: map['id'] as int?,
-      exerciseId: map['exercise_id'] as int?,
+      recordId: map['record_id'] as int?,
       reps: map['reps'] as int,
       weight: (map['weight'] as num).toDouble(),
-      order: map['set_order'] as int,
+      order: map['series_order'] as int,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'exercise_id': exerciseId,
+      'record_id': recordId,
       'reps': reps,
       'weight': weight,
-      'set_order': order,
+      'series_order': order,
     };
-  }
-
-  factory WorkoutSet.fromJson(Map<String, dynamic> map) {
-    return WorkoutSet(
-      id: map['id'] as int?,
-      exerciseId: map['exercise_id'] as int?,
-      reps: map['reps'] as int,
-      weight: (map['weight'] as num).toDouble(),
-      order: map['set_order'] as int,
-    );
   }
 }

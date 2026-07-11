@@ -12,7 +12,7 @@ import 'package:app/main.dart';
 void main() {
   testWidgets('App builds smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const TrainProgressApp());
+    await tester.pumpWidget(const FitLogApp());
 
     // Verify that the app shows the main title.
     expect(find.text('FitLog'), findsOneWidget);
