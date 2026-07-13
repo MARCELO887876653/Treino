@@ -10,6 +10,8 @@ import 'package:vibration/vibration.dart';
 
 import 'database_helper.dart';
 import 'models.dart';
+import 'ai_chat_page.dart';
+import 'settings_page.dart';
 
 const Color kPrimaryColor = Color(0xFFFF6B35);
 const Color kAccentColor = Color(0xFFE63946);
@@ -361,6 +363,18 @@ class _CategoryHomePageState extends State<CategoryHomePage> {
       appBar: AppBar(
         title: const Text('FitLog'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline),
+            onPressed: () {
+              Navigator.of(context).push(fadeRoute(const AiChatPage()));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              Navigator.of(context).push(fadeRoute(const SettingsPage()));
+            },
+          ),
           PopupMenuButton<String>(
             onSelected: (value) async {
               if (value == 'categories') {
